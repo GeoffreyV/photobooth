@@ -141,6 +141,40 @@ class GreeterMessage(QtWidgets.QFrame):
         self.setLayout(lay)
 
 
+class GreeterGifMessage(QtWidgets.QFrame):
+
+    def __init__(self, num, countdown_action):
+
+        super().__init__()
+        self.setObjectName('GreeterMessage')
+
+        self._text_title = _('Get ready!')
+        self._text_button = _('Start countdown')
+
+        num_pictures = max(num, 1)
+        if num_pictures > 1:
+            self._text_label = _('for {} pictures...').format(num_pictures)
+        else:
+            self._text_label = ''
+
+        self.initFrame(countdown_action)
+
+    def initFrame(self, countdown_action):
+
+        ttl = QtWidgets.QLabel(self._text_title)
+        ttl.setObjectName('title')
+        btn = QtWidgets.QPushButton(self._text_button)
+        btn.setObjectName('button')
+        btn.clicked.connect(countdown_action)
+        lbl = QtWidgets.QLabel(self._text_label)
+        lbl.setObjectName('message')
+
+        lay = QtWidgets.QVBoxLayout()
+        lay.addWidget(ttl)
+        lay.addWidget(btn)
+        lay.addWidget(lbl)
+        self.setLayout(lay)
+
 class CaptureMessage(QtWidgets.QFrame):
 
     def __init__(self, num_picture, num_x, num_y, skip_last):

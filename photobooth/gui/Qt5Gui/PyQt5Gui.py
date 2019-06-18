@@ -173,7 +173,6 @@ class PyQt5Gui(GuiSkeleton):
             lambda: self._comm.send(Workers.MASTER, GuiEvent('trigger')),
             lambda: self._comm.send(Workers.MASTER, GuiEvent('trigger_GIF'))))
 
-
     def showGreeter(self, state):
 
         self._enableEscape()
@@ -186,6 +185,21 @@ class PyQt5Gui(GuiSkeleton):
 
         self._setWidget(Frames.GreeterMessage(
             *num_pic, skip_last,
+            lambda: self._comm.send(Workers.MASTER, GuiEvent('countdown'))))
+        QtCore.QTimer.singleShot(
+            greeter_time,
+            lambda: self._comm.send(Workers.MASTER, GuiEvent('countdown')))
+
+    def showGreeterGif(self, state):
+
+        self._enableEscape()
+        self._disableTrigger()
+
+        num_pic = (self._cfg.getInt('Gif', 'num'))
+        greeter_time = self._cfg.getInt('Photobooth', 'greeter_time') * 1000
+
+        self._setWidget(Frames.GreeterGifMessage(
+            num_pic,
             lambda: self._comm.send(Workers.MASTER, GuiEvent('countdown'))))
         QtCore.QTimer.singleShot(
             greeter_time,
