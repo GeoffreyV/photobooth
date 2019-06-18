@@ -89,6 +89,8 @@ class GuiSkeleton:
             self.showIdle(state)
         elif isinstance(state, StateMachine.GreeterState):
             self.showGreeter(state)
+        elif isinstance(state, StateMachine.GreeterGifState):
+            self.showGreeter(state)
         elif isinstance(state, StateMachine.CountdownState):
             self.showCountdown(state)
         elif isinstance(state, StateMachine.CaptureState):

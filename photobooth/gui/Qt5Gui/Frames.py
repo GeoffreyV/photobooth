@@ -79,25 +79,30 @@ class Welcome(QtWidgets.QFrame):
 
 class IdleMessage(QtWidgets.QFrame):
 
-    def __init__(self, trigger_action):
+    def __init__(self, trigger_action, trigger2_action):
 
         super().__init__()
         self.setObjectName('IdleMessage')
 
         self._message_label = _('Hit the')
         self._message_button = _('Button!')
+        self._message_gif = _('GIF')
 
-        self.initFrame(trigger_action)
+        self.initFrame(trigger_action, trigger2_action)
 
-    def initFrame(self, trigger_action):
+    def initFrame(self, trigger_action, trigger2_action):
 
         lbl = QtWidgets.QLabel(self._message_label)
         btn = QtWidgets.QPushButton(self._message_button)
+        btn_gif = QtWidgets.QPushButton(self._message_gif)
+
         btn.clicked.connect(trigger_action)
+        btn_gif.clicked.connect(trigger2_action)
 
         lay = QtWidgets.QVBoxLayout()
         lay.addWidget(lbl)
         lay.addWidget(btn)
+        lay.addWidget(btn_gif)
         self.setLayout(lay)
 
 
@@ -473,6 +478,7 @@ class Settings(QtWidgets.QFrame):
         tabs.addTab(self.createPhotoboothSettings(), _('Photobooth'))
         tabs.addTab(self.createCameraSettings(), _('Camera'))
         tabs.addTab(self.createPictureSettings(), _('Picture'))
+        tabs.addTab(self.createGifSettings(), _('Gif'))
         tabs.addTab(self.createStorageSettings(), _('Storage'))
         tabs.addTab(self.createGpioSettings(), _('GPIO'))
         tabs.addTab(self.createPrinterSettings(), _('Printer'))
@@ -716,6 +722,57 @@ class Settings(QtWidgets.QFrame):
         widget.setLayout(layout)
         return widget
 
+    def createGifSettings(self):
+
+        self.init('Gif')
+
+        num = QtWidgets.QSpinBox()
+        num.setRange(1, 99)
+        num.setValue(self._cfg.getInt('Gif', 'num'))
+        self.add('Gif', 'num', num)
+
+        size_x = QtWidgets.QSpinBox()
+        size_x.setRange(1, 999999)
+        size_x.setValue(self._cfg.getInt('Gif', 'size_x'))
+        self.add('Gif', 'size_x', size_x)
+
+        size_y = QtWidgets.QSpinBox()
+        size_y.setRange(1, 999999)
+        size_y.setValue(self._cfg.getInt('Gif', 'size_y'))
+        self.add('Gif', 'size_y', size_y)
+
+        bg = QtWidgets.QLineEdit(self._cfg.get('Gif', 'background'))
+        self.add('Gif', 'background', bg)
+
+        lay_num = QtWidgets.QHBoxLayout()
+        lay_num.addWidget(num)
+
+        lay_size = QtWidgets.QHBoxLayout()
+        lay_size.addWidget(size_x)
+        lay_size.addWidget(QtWidgets.QLabel('x'))
+        lay_size.addWidget(size_y)
+
+        def file_dialog():
+            dialog = QtWidgets.QFileDialog.getOpenFileName
+            bg.setText(dialog(self, _('Select file'), os.path.expanduser('~'),
+                              'Images (*.jpg *.png)')[0])
+
+        file_button = QtWidgets.QPushButton(_('Select file'))
+        file_button.clicked.connect(file_dialog)
+
+        lay_file = QtWidgets.QHBoxLayout()
+        lay_file.addWidget(bg)
+        lay_file.addWidget(file_button)
+
+        layout = QtWidgets.QFormLayout()
+        layout.addRow(_('Number of shots per Gif:'), lay_num)
+        layout.addRow(_('Size of assembled Gif [px]:'), lay_size)
+        layout.addRow(_('Background image:'), lay_file)
+
+        widget = QtWidgets.QWidget()
+        widget.setLayout(layout)
+        return widget
+
     def createStorageSettings(self):
 
         self.init('Storage')
@@ -896,6 +953,14 @@ class Settings(QtWidgets.QFrame):
                       str(self.get('Picture', 'skip_last').isChecked()))
         self._cfg.set('Picture', 'background',
                       self.get('Picture', 'background').text())
+
+        self._cfg.set('Gif', 'num', self.get('Gif', 'num').text())
+        self._cfg.set('Gif', 'size_x',
+                      self.get('Gif', 'size_x').text())
+        self._cfg.set('Gif', 'size_y',
+                      self.get('Gif', 'size_y').text())
+        self._cfg.set('Gif', 'background',
+                      self.get('Gif', 'background').text())
 
         self._cfg.set('Storage', 'basedir',
                       self.get('Storage', 'basedir').text())

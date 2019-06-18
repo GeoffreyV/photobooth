@@ -170,7 +170,9 @@ class PyQt5Gui(GuiSkeleton):
         self._enableEscape()
         self._enableTrigger()
         self._setWidget(Frames.IdleMessage(
-            lambda: self._comm.send(Workers.MASTER, GuiEvent('trigger'))))
+            lambda: self._comm.send(Workers.MASTER, GuiEvent('trigger')),
+            lambda: self._comm.send(Workers.MASTER, GuiEvent('trigger_GIF'))))
+
 
     def showGreeter(self, state):
 

@@ -357,11 +357,29 @@ class IdleState(State):
         if ((isinstance(event, GuiEvent) or isinstance(event, GpioEvent)) and
            event.name == 'trigger'):
             context.state = GreeterState()
+        elif ((isinstance(event, GuiEvent) or isinstance(event, GpioEvent)) and
+           event.name == 'trigger_GIF'):
+            context.state = GreeterGifState()
         else:
             raise TypeError('Unknown Event type "{}"'.format(event))
 
 
 class GreeterState(State):
+
+    def __init__(self):
+
+        super().__init__()
+
+    def handleEvent(self, event, context):
+
+        if ((isinstance(event, GuiEvent) or isinstance(event, GpioEvent)) and
+           event.name == 'countdown'):
+            context.state = CountdownState(1)
+        else:
+            raise TypeError('Unknown Event type "{}"'.format(event))
+
+
+class GreeterGifState(State):
 
     def __init__(self):
 
