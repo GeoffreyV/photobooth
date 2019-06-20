@@ -127,6 +127,7 @@ class Camera:
     def capturePreview(self):
 
         if self._is_preview:
+            self.setActive()
             while self._comm.empty(Workers.CAMERA):
                 picture = self._cap.getPreview()
                 if self._rotation is not None:
@@ -147,7 +148,6 @@ class Camera:
         byte_data = BytesIO()
         picture.save(byte_data, format='jpeg')
         self._pictures.append(byte_data)
-        self.setActive()
 
         if self._is_keep_pictures:
             self._comm.send(Workers.WORKER,
