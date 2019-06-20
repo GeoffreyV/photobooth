@@ -29,11 +29,19 @@ msgstr "Photobooth"
 
 #: photobooth/gui/Qt5Gui/Frames.py:87
 msgid "Hit the"
-msgstr "Drück' den"
+msgstr "Was wird es sein ?"
 
 #: photobooth/gui/Qt5Gui/Frames.py:88
 msgid "Button!"
 msgstr "Knopf!"
+
+#: photobooth/gui/Qt5Gui/Frames.py:88
+msgid "Photos"
+msgstr "Foto"
+
+#: photobooth/gui/Qt5Gui/Frames.py:89
+msgid "GIF"
+msgstr "GIF"
 
 #: photobooth/gui/Qt5Gui/Frames.py:111
 msgid "Get ready!"
