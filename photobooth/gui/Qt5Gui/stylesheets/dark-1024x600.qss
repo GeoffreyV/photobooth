@@ -123,6 +123,16 @@ QFrame#PictureMessage {
     margin: 30px;
 }
 
+/* Gif Screen */
+
+QFrame#GifMessage {
+    margin: 30px;
+}
+
+QFrame#GifMessage QLabel {
+    qproperty-alignment: AlignCenter;
+}
+
 /* Overlay message */
 
 QWidget#TransparentOverlay {

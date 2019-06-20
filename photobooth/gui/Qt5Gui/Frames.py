@@ -241,7 +241,7 @@ class GifMessage(QtWidgets.QFrame):
         self.initFrame()
 
     def initFrame(self):
-        lbl = QtWidgets.QLabel()
+        lbl = QtWidgets.QLabel(self)
         lbl.setMovie(self._gif)
         lbl.show()
         lay = QtWidgets.QVBoxLayout()
