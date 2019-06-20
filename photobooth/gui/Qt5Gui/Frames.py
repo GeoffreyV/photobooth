@@ -85,7 +85,7 @@ class IdleMessage(QtWidgets.QFrame):
         self.setObjectName('IdleMessage')
 
         self._message_label = _('Hit the')
-        self._message_button = _('Button!')
+        self._message_button = _('Photos')
         self._message_gif = _('GIF')
 
         self.initFrame(trigger_action, trigger2_action)
@@ -101,8 +101,10 @@ class IdleMessage(QtWidgets.QFrame):
 
         lay = QtWidgets.QVBoxLayout()
         lay.addWidget(lbl)
-        lay.addWidget(btn)
-        lay.addWidget(btn_gif)
+        btn_lay = QtWidgets.QHBoxLayout()
+        btn_lay.addWidget(btn)
+        btn_lay.addWidget(btn_gif)
+        lay.addLayout(btn_lay)
         self.setLayout(lay)
 
 
