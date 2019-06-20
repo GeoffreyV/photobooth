@@ -192,7 +192,13 @@ class CameraEvent(Event):
 
 class WorkerEvent(Event):
 
-    pass
+    def __init__(self, name, path=None):
+        super().__init__(name)
+        self._path = path
+
+    @property
+    def path(self):
+        return self._path
 
 
 class State:
@@ -450,6 +456,8 @@ class AssembleState(State):
 
         if isinstance(event, CameraEvent) and event.name == 'review':
             context.state = ReviewState(event.picture)
+        elif isinstance(event, CameraEvent) and event.name == 'save_gif':
+            context.state = SaveGifState(event.picture)
         else:
             raise TypeError('Unknown Event type "{}"'.format(event))
 
@@ -473,6 +481,45 @@ class ReviewState(State):
         else:
             raise TypeError('Unknown Event type "{}"'.format(event))
 
+
+class SaveGifState(State):
+
+    def __init__(self, picture):
+
+        super().__init__()
+        self._picture = picture
+
+    @property
+    def picture(self):
+
+        return self._picture
+
+    def handleEvent(self, event, context):
+
+        if isinstance(event, WorkerEvent) and event.name == 'review':
+            context.state = ReviewGifState(event.path)
+        else:
+            raise TypeError('Unknown Event type "{}"'.format(event))
+
+
+class ReviewGifState(State):
+
+    def __init__(self, path_to_gif):
+
+        super().__init__()
+        self._path_to_gif = path_to_gif
+
+    @property
+    def path(self):
+
+        return self._path_to_gif
+
+    def handleEvent(self, event, context):
+
+        if isinstance(event, GuiEvent) and event.name == 'postprocess':
+            context.state = PostprocessState()
+        else:
+            raise TypeError('Unknown Event type "{}"'.format(event))
 
 class PostprocessState(State):
 

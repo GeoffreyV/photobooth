@@ -50,6 +50,8 @@ class Camera:
         self._cap = None
         self._pic_dims = None
 
+        self._num_pic_gif = 0
+
         self._is_preview = self._cfg.getBool('Photobooth', 'show_preview')
         self._is_gif = False
         self._is_keep_pictures = self._cfg.getBool('Storage', 'keep_pictures')
@@ -71,6 +73,8 @@ class Camera:
 
         self._pic_dims = PictureDimensions(self._cfg, test_picture.size)
         self._is_preview = self._is_preview and self._cap.hasPreview
+
+        self._num_pic_gif = self._cfg.getInt('Gif', 'num')
 
         background = self._cfg.get('Picture', 'background')
         if len(background) > 0:
@@ -156,8 +160,10 @@ class Camera:
         if self._is_keep_pictures:
             self._comm.send(Workers.WORKER,
                             StateMachine.CameraEvent('capture', byte_data))
-
-        if state.num_picture < self._pic_dims.totalNumPictures:
+        if self._is_gif and state.num_picture < self._num_pic_gif:
+            self._comm.send(Workers.MASTER,
+                            StateMachine.CameraEvent('countdown'))
+        elif not self._is_gif and state.num_picture < self._pic_dims.totalNumPictures:
             self._comm.send(Workers.MASTER,
                             StateMachine.CameraEvent('countdown'))
         else:
@@ -167,7 +173,12 @@ class Camera:
     def assemblePicture(self):
 
         self.setIdle()
+        if self._is_gif:
+            self.createGif()
+        else:
+            self.createPrintable()
 
+    def createPrintable(self):
         picture = self._template.copy()
         for i in range(self._pic_dims.totalNumPictures):
             shot = Image.open(self._pictures[i])
@@ -179,3 +190,24 @@ class Camera:
         self._comm.send(Workers.MASTER,
                         StateMachine.CameraEvent('review', byte_data))
         self._pictures = []
+
+
+    def createGif(self):
+
+        self.setIdle()
+        picture = self._template.copy()
+        gif = []
+        for i in range(self._num_pic_gif):
+            gif.append(self._template.copy())
+            shot = Image.open(self._pictures[i])
+            resized = shot.resize(self._pic_dims.outputSize)
+            gif[i].paste(resized)
+
+        byte_data = BytesIO()
+        gif[0].save(byte_data, format='GIF', append_images=gif[1:],
+                    save_all=True, duration=100, loop=0)
+
+        self._comm.send(Workers.MASTER,
+                        StateMachine.CameraEvent('save_gif', byte_data))
+
+        self._pictures.clear()

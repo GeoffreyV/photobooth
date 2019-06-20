@@ -54,34 +54,55 @@ class PictureSaver(WorkerTask):
             f.write(picture.getbuffer())
 
 
+class GifSaver(WorkerTask):
+
+    def __init__(self, basename):
+
+        super().__init__()
+
+        self._pic_list = PictureList(basename, is_gif=True)
+
+    def do(self, picture):
+
+        filename = self._pic_list.getNext()
+        logging.info('Saving picture as %s', filename)
+        with open(filename, 'wb') as f:
+            f.write(picture.getbuffer())
+
+
 class Worker:
 
     def __init__(self, config, comm):
 
         self._comm = comm
+        path = os.path.join(config.get('Storage', 'basedir'),
+                            config.get('Storage', 'basename'))
+        self._basename = strftime(path, localtime())
 
+        #Init tasks
         self.initPostprocessTasks(config)
         self.initPictureTasks(config)
+        self.initGifTasks(config)
 
     def initPostprocessTasks(self, config):
 
         self._postprocess_tasks = []
 
         # PictureSaver for assembled pictures
-        path = os.path.join(config.get('Storage', 'basedir'),
-                            config.get('Storage', 'basename'))
-        basename = strftime(path, localtime())
-        self._postprocess_tasks.append(PictureSaver(basename))
+        self._postprocess_tasks.append(PictureSaver(self._basename))
 
     def initPictureTasks(self, config):
 
         self._picture_tasks = []
 
         # PictureSaver for single shots
-        path = os.path.join(config.get('Storage', 'basedir'),
-                            config.get('Storage', 'basename') + '_shot_')
-        basename = strftime(path, localtime())
-        self._picture_tasks.append(PictureSaver(basename))
+        self._picture_tasks.append(PictureSaver(self._basename))
+
+    def initGifTasks(self, config):
+        self._gif_tasks = []
+
+        # PictureSaver for single shots
+        self._gif_tasks.append(GifSaver(self._basename))
 
     def run(self):
 
@@ -96,6 +117,8 @@ class Worker:
             self.teardown(state)
         elif isinstance(state, StateMachine.ReviewState):
             self.doPostprocessTasks(state.picture)
+        elif isinstance(state, StateMachine.SaveGifState):
+            self.doGifTasks(state.picture)
         elif isinstance(state, StateMachine.CameraEvent):
             if state.name == 'capture':
                 self.doPictureTasks(state.picture)
@@ -115,3 +138,10 @@ class Worker:
 
         for task in self._picture_tasks:
             task.do(picture)
+
+    def doGifTasks(self, gif):
+        for task in self._gif_tasks:
+            task.do(gif)
+        self._comm.send(Workers.MASTER,
+                        StateMachine.WorkerEvent('review', path=PictureList(self._basename, is_gif=True).getLast()))
+

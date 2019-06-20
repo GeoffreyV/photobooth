@@ -51,6 +51,10 @@ class GuiSkeleton:
 
         raise NotImplementedError()
 
+    def showGreeterGif(self, state):
+
+        raise NotImplementedError()
+
     def showCountdown(self, state):
 
         raise NotImplementedError()
@@ -64,6 +68,10 @@ class GuiSkeleton:
         raise NotImplementedError()
 
     def showReview(self, state):
+
+        raise NotImplementedError()
+
+    def showReviewGif(self, state):
 
         raise NotImplementedError()
 
@@ -99,6 +107,8 @@ class GuiSkeleton:
             self.showAssemble(state)
         elif isinstance(state, StateMachine.ReviewState):
             self.showReview(state)
+        elif isinstance(state, StateMachine.ReviewGifState):
+            self.showReviewGif(state)
         elif isinstance(state, StateMachine.PostprocessState):
             self.showPostprocess(state)
         elif isinstance(state, StateMachine.TeardownState):

@@ -175,14 +175,15 @@ class GreeterGifMessage(QtWidgets.QFrame):
         lay.addWidget(lbl)
         self.setLayout(lay)
 
+
 class CaptureMessage(QtWidgets.QFrame):
 
-    def __init__(self, num_picture, num_x, num_y, skip_last):
+    def __init__(self, num_picture, num, skip_last):
 
         super().__init__()
         self.setObjectName('PoseMessage')
 
-        num_pictures = max(num_x * num_y - int(skip_last), 1)
+        num_pictures = max(num - int(skip_last), 1)
         if num_pictures > 1:
             self._text = _('Picture {} of {}...').format(num_picture,
                                                          num_pictures)
@@ -226,6 +227,29 @@ class PictureMessage(QtWidgets.QFrame):
         painter = QtGui.QPainter(self)
         self._paintPicture(painter)
         painter.end()
+
+
+class GifMessage(QtWidgets.QFrame):
+
+    def __init__(self, gif: QtGui.QMovie):
+
+        super().__init__()
+        self.setObjectName('GifMessage')
+        self._gif = gif
+        self._gif.setScaledSize(self.contentsRect().size())
+        self._gif.setCacheMode(QtGui.QMovie.CacheAll)
+        self.initFrame()
+
+    def initFrame(self):
+        lbl = QtWidgets.QLabel()
+        lbl.setMovie(self._gif)
+        lbl.show()
+        lay = QtWidgets.QVBoxLayout()
+        lay.addWidget(lbl)
+
+        self._gif.start()
+
+        self.setLayout(lay)
 
 
 class WaitMessage(QtWidgets.QFrame):

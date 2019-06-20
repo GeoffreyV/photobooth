@@ -50,6 +50,8 @@ class PyQt5Gui(GuiSkeleton):
         self._initReceiver()
         self._initWorker()
 
+        self._numPicture = 0
+
         self._picture = None
         self._postprocess = GuiPostprocessor(self._cfg)
 
@@ -180,6 +182,8 @@ class PyQt5Gui(GuiSkeleton):
 
         num_pic = (self._cfg.getInt('Picture', 'num_x'),
                    self._cfg.getInt('Picture', 'num_y'))
+
+        self._numPicture = num_pic[0] * num_pic[1]
         skip_last = self._cfg.getBool('Picture', 'skip_last')
         greeter_time = self._cfg.getInt('Photobooth', 'greeter_time') * 1000
 
@@ -195,11 +199,12 @@ class PyQt5Gui(GuiSkeleton):
         self._enableEscape()
         self._disableTrigger()
 
-        num_pic = (self._cfg.getInt('Gif', 'num'))
+        self._numPicture = self._cfg.getInt('Gif', 'num')
+
         greeter_time = self._cfg.getInt('Photobooth', 'greeter_time') * 1000
 
         self._setWidget(Frames.GreeterGifMessage(
-            num_pic,
+            self._numPicture,
             lambda: self._comm.send(Workers.MASTER, GuiEvent('countdown'))))
         QtCore.QTimer.singleShot(
             greeter_time,
@@ -220,10 +225,8 @@ class PyQt5Gui(GuiSkeleton):
 
     def showCapture(self, state):
 
-        num_pic = (self._cfg.getInt('Picture', 'num_x'),
-                   self._cfg.getInt('Picture', 'num_y'))
         skip_last = self._cfg.getBool('Picture', 'skip_last')
-        self._setWidget(Frames.CaptureMessage(state.num_picture, *num_pic,
+        self._setWidget(Frames.CaptureMessage(state.num_picture, self._numPicture,
                                               skip_last))
 
     def showAssemble(self, state):
@@ -240,6 +243,15 @@ class PyQt5Gui(GuiSkeleton):
             review_time,
             lambda: self._comm.send(Workers.MASTER, GuiEvent('postprocess')))
         self._postprocess.do(self._picture)
+
+    def showReviewGif(self, state):
+
+        gif = QtGui.QMovie(state.path)
+        review_time = self._cfg.getInt('Photobooth', 'display_time') * 1000
+        self._setWidget(Frames.GifMessage(gif))
+        QtCore.QTimer.singleShot(
+            review_time,
+            lambda: self._comm.send(Workers.MASTER, GuiEvent('postprocess')))
 
     def showPostprocess(self, state):
 
